@@ -1,0 +1,60 @@
+Hardware::Vhdl::Parse.pm is "beta" version
+
+The Hardware::Vhdl::Parse.pm file contains a VHDL grammar.
+This grammar is used by Parse::RecDescent to parse any
+VHDL design file. You will need the latest version of 
+Parse::RecDescent to use this grammar.
+
+parser.pl is a script which uses this module to do the actual parsing.  
+A test VHDL file is included called test1.vhd
+
+to parse this file, type:
+
+parser.pl test1.vhd
+
+The parser.pl script doesn't do anything except parse the file.
+There is another module called hierarchy.pm which spits out
+the name of all instantiated components. There is a script,
+called hierarchy.pl, that uses this module. To run this script,
+type:
+
+hierarchy.pl test1.vhd
+
+this should print out:
+INSTANCENAME DUT 
+
+
+PLEASE NOTE: the script takes some time to simply load the grammar.
+the it takes about half a minute (yes, 30 seconds) to run the 
+hierarchy.pl test1.vhd command shown above when run on an Ultra 60.
+your performance may vary.
+
+the Parse::RecDescent has some features which will eventually 
+allow me to speed up this execution time. I'll get to that
+when the grammar is ironed out.
+
+status of grammar: Beta
+
+once the grammar is in a released state, 
+then I'll concentrate on tools that use the grammar. 
+
+possible tool applications include: 
+1) automatic build scripts, 
+2) automatic synthesis scripts, 
+3) hierarchical browswers,
+4) lint type checking with a hardware slant,
+   "hey buddy, you've got combinatorial logic driving a module output port"
+   "you've got combinatorial paths that cross multiple hierarchy boundaries."
+   "did you ever hear of clocking all your output ports"
+5) a script that can go through a netlist,
+	find all the signals,
+	perform regular-expression renaming on the signals,
+	and save the results as a new netlist.
+
+
+If you have any corrections or questions,
+please send them to me at
+greg42@bellatlantic.net
+
+thanks,
+Greg London

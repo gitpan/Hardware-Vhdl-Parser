@@ -20,7 +20,7 @@ use vars qw($VERSION @ISA);
 
 @ISA = ( 'Parse::RecDescent' );
 
-$VERSION = '0.10';
+$VERSION = '0.11';
 #########################################################################
 
 
@@ -589,7 +589,7 @@ subprogram_specification :
 procedure_specification :
 	reserved_word_procedure 
 		identifier_or_operator_symbol
-		subprogram_parameter_section(?) 
+		parameter_interface_list(?) 
 
 identifier_or_operator_symbol :
 	identifier | operator_symbol
@@ -598,9 +598,19 @@ function_specification :
 	pure_or_impure(?) 
 	reserved_word_function 
 		identifier_or_operator_symbol 
-		subprogram_parameter_section(?) 
+		parameter_interface_list(?) 
 	reserved_word_return
 		type_mark 
+	| <error>
+
+####
+# parameter interface list
+# used to declare io for functions or procedure declarations
+####
+parameter_interface_list : 
+	'(' interface_list ')' 
+	| <error>
+
 
 pure_or_impure :
 	reserved_word_pure | reserved_word_impure
@@ -615,6 +625,7 @@ subprogram_body :
 	reserved_word_function_or_procedure(?)
 	identifier_or_operator_symbol(?) 
 	';' 
+	| <error>
 
 reserved_word_function_or_procedure : 
 	reserved_word_function | reserved_word_procedure
@@ -1007,6 +1018,7 @@ subtype_indication :
 	# resolution_function_name 
 	type_mark
 	range_or_simple_or_discrete(?)  
+	| <error>
 
 range_or_simple_or_discrete :
 	  reserved_word_range_range_attribute_name_or_simple_downto_expression
@@ -1462,14 +1474,14 @@ null_statement :
 # E.7 Interfaces and Associations
 ####################################################
 interface_list :
-	interface_item_comma_interface_item
+	interface_item_semicolon_interface_item
 
-interface_item_comma_interface_item :
+interface_item_semicolon_interface_item :
 	interface_item
-	comma_interface_item(s?)
+	semicolon_interface_item(s?)
 
-comma_interface_item :
-	','
+semicolon_interface_item :
+	';'
 	interface_item
 
 interface_item :
@@ -1478,6 +1490,7 @@ interface_item :
 	| variable_interface 
 	| file_interface
 
+
 constant_interface :
 	reserved_word_constant(?) 
 		identifier_comma_identifier 
@@ -1485,7 +1498,7 @@ constant_interface :
 	reserved_word_in(?) 
 		subtype_indication 
 		default_value(?) 
-	';'
+	| <error>
 
 
 signal_interface :
@@ -1496,7 +1509,7 @@ signal_interface :
 		subtype_indication 
 	reserved_word_bus(?) 
 		default_value(?) 
-	';'
+	| <error>
 
 variable_interface :
 	reserved_word_variable(?) 
@@ -1505,14 +1518,14 @@ variable_interface :
 		mode(?) 
 		subtype_indication 
 		default_value(?) 
-	';'
+	| <error>
 
 file_interface :
 	reserved_word_file 
 		identifier_comma_identifier 
 	':'
 		subtype_indication 
-	';'
+	| <error>
 
 mode : 
 	  reserved_word_inout 
@@ -1528,17 +1541,21 @@ association_list :
 actual_formal_comma_actual_formal :
 	actual_part_with_optional_formal_part
 	comma_actual_part_with_optional_formal_part(s?)
+	| <error>
 
 comma_actual_part_with_optional_formal_part :
 	','
 	actual_part_with_optional_formal_part
+	| <error>
 
 actual_part_with_optional_formal_part :
 	formal_part_and_arrow(?) 
 		actual_part
+	| <error>
 
 formal_part_and_arrow :
 	formal_part '=>'
+	| <error>
 
 formal_part :
 	  generic_name 
@@ -1546,12 +1563,15 @@ formal_part :
 	| parameter_name 
 	| function_name generic_port_parameter_selection 
 	| type_mark generic_port_parameter_selection 
+	| <error>
 
 generic_port_parameter_selection :
 	'(' generic_name_port_name_parameter_name ')'
+	| <error>
 
 generic_name_port_name_parameter_name :
 	generic_name | port_name | parameter_name
+	| <error>
 
 actual_part :
 	  expression_rule 
@@ -1559,6 +1579,7 @@ actual_part :
 	| reserved_word_open 
 	| function_name_signal_name_or_variable_name_selection 
 	| type_mark_signal_name_or_variable_name_selection
+	| <error>
 
 
 function_name_signal_name_or_variable_name_selection :
@@ -1948,7 +1969,6 @@ generic_interface_list_entry :
 
 default_value : 
 	':=' static_expression
-	| <error>
 
 generic_map_section : 
 	reserved_word_generic 
@@ -2020,14 +2040,17 @@ port_association_list :
 	association_list 
 	| <error>
 
+
 ####
 # parameters to procedure/function call
 ####
 subprogram_parameter_section : 
 	'(' parameter_association_list ')' 
+	| <error>
 
 parameter_association_list :
 	association_list 
+	| <error>
 
 ####
 # instance labels

@@ -1,4 +1,4 @@
-LIBrary IEEE; 
+LIBrary IEEE;
 
 -- -----------------------------------------------
 -- comment_one
@@ -17,6 +17,8 @@ package mypackage is
 	-- -----------------------------------------------
 
 	function my_function return mytype;
+
+	function my_function(a,b,c:std_logic_vector(2 downto 0)) return mytype;
 
 	type myenumeratedtype is ( bingo  ,  bango );
 

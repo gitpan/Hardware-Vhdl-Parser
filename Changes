@@ -20,3 +20,7 @@ Revision history for Perl extension Hardware::Vhdl::Parser.
 	- major error with function/procedure declarations fixed.
 	  incorrectly used association_list when should have
 	  been using interface_list.  
+
+0.12 12 Jun 2002
+	- fix problem with configuration rules
+	  haven't checked it with VHDL grammar standard yet.

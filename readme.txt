@@ -36,9 +36,9 @@ the it takes about a minute (yes, 60 seconds) to run the
 hierarchy.pl test1.vhd command shown above when run on an Ultra 60.
 your performance may vary.
 
-the Parse::RecDescent has some features which will eventually 
-allow me to speed up this execution time. I'll get to that
-when the grammar is ironed out.
+parsing speed will probably be somewhere along the lines of
+10 to 20 lines per minute. (I haven't done any full-fledged
+benchmarking on this module)
 
 status of grammar: Beta
 
@@ -58,10 +58,3 @@ possible tool applications include:
 	perform regular-expression renaming on the signals,
 	and save the results as a new netlist.
 
-
-If you have any corrections or questions,
-please send them to me at
-greg42@bellatlantic.net
-
-thanks,
-Greg London

@@ -20,7 +20,7 @@ use vars qw($VERSION @ISA);
 
 @ISA = ( 'Parse::RecDescent' );
 
-$VERSION = '0.11';
+$VERSION = '0.12';
 #########################################################################
 
 
@@ -512,12 +512,26 @@ use_clause_or_attribute_specification_or_group_declaration :
 
 
 block_configuration : 
-	reserved_word_for 
-		architecture_name
-	use_clause(?)
-	reserved_word_end 
-	reserved_word_for 
-	';'
+                  reserved_word_for 
+                          architecture_name
+                  use_clause_or_for_use_clause(s?)
+                  reserved_word_end 
+                  reserved_word_for 
+                  ';'
+
+use_clause_or_for_use_clause :
+	  use_clause
+	| for_use_clause
+
+for_use_clause : 
+                  reserved_word_for
+                  identifier
+                  ':'
+                  identifier
+                  use_clause(?)
+                  reserved_word_end 
+                  reserved_word_for 
+                  ';'
 
 package_declaration :
 	reserved_word_package 

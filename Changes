@@ -1,0 +1,8 @@
+Revision history for Perl extension Hardware::Vhdl::Parser.
+
+0.01  Tue Feb  1 16:48:44 2000
+	- original version; created by h2xs 1.19
+
+0.07  3 Feb 2000
+	- now handles comments.
+	- and reserved words are case insensitive

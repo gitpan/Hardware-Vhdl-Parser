@@ -1,4 +1,10 @@
-Hardware::Vhdl::Parse.pm is "beta" version
+##################################################################
+# Copyright (C) 2000 Greg London   All Rights Reserved.
+# This program is free software; you can redistribute it and/or
+# modify it under the same terms as Perl itself.
+##################################################################
+
+Hardware::Vhdl::Parse.pm is currently in "beta" status
 
 The Hardware::Vhdl::Parse.pm file contains a VHDL grammar.
 This grammar is used by Parse::RecDescent to parse any

@@ -1,8 +1,8 @@
 
 
-package mypackage is
+Package mypackage is
 
-	type mytype;
+	TyPe mytype;
 
 	function my_function return mytype;
 
@@ -10,13 +10,13 @@ package mypackage is
 
 end  ;
 
-package body mypackage is
+package BOdy mypackage is
 
 	function my_function return mytype is
 	
 	begin
 
-		case yada is
+		caSE yada is
 			when fist_choice => null;
 		end case ;
 
@@ -120,7 +120,7 @@ begin
 	generic map (
 		length => narrow_data_in_a'length,
 		depth => 1
-		) ;
+		) 
 	port map (
 	
 		clock	=> clock,

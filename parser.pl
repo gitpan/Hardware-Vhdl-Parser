@@ -6,15 +6,9 @@
 ####################################################
 
 use Hardware::Vhdl::Parser;
-$parse = new Hardware::Vhdl::Parser;
+$parser = new Hardware::Vhdl::Parser;
 
-# $::RD_TRACE = 1;
-$::RD_WARN = undef;
-$::RD_HINT = undef;
-
-my @file = <>;
-my $file = join('',@file);
-$parse->design_file($file);
+$parser->Filename(@ARGV);
 
 
 

@@ -24,14 +24,11 @@ sub new
  my $r_hash = $pkg->SUPER::new;
 
  $r_hash -> Replace ( q( 
+
 component_instantiation_statement :
 	instantiation_label 
 	':'
-	(
-		reserved_word_entity_and_entity_name_arch_name_in_parens |
-		reserved_word_configuration_and_configuration_name |
-		reserved_word_component_and_component_name 
-	)
+	entity_configuration_component
 	generic_map_section(?)
 	port_map_section(?)
 	';'

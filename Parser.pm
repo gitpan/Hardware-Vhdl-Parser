@@ -20,7 +20,7 @@ use vars qw($VERSION @ISA);
 
 @ISA = ( 'Parse::RecDescent' );
 
-$VERSION = '0.09';
+$VERSION = '0.10';
 #########################################################################
 
 
@@ -424,13 +424,12 @@ library_clause :
 	reserved_word_library library_name_list ';'  
 
 library_name_list : 
-	one_or_more_identifiers_separated_by_commas
+	identifier_comma_identifier
 
 use_clause : 
-	reserved_word_use  selected_name_list  ';' 
-
-selected_name_list :
-	one_or_more_selected_names_separated_by_commas
+	reserved_word_use  
+	selected_name_comma_selected_name
+	';' 
 
 ####################################################
 ####################################################
@@ -655,7 +654,7 @@ type_definition :
 
 constant_declaration :
 	reserved_word_constant 
-		one_or_more_identifiers_separated_by_commas 
+		identifier_comma_identifier 
 	':'
 		subtype_indication 
 		default_value(?) 
@@ -663,7 +662,7 @@ constant_declaration :
 
 signal_declaration :
 	reserved_word_signal 
-		one_or_more_identifiers_separated_by_commas 
+		identifier_comma_identifier 
 	':'
 		subtype_indication  
 		reserved_word_register_or_bus(?)
@@ -679,7 +678,7 @@ shared_variable_declaration :
 
 variable_declaration :
 	reserved_word_variable 
-		one_or_more_identifiers_separated_by_commas 
+		identifier_comma_identifier 
 	':'
 		subtype_indication
 		default_value(?)
@@ -687,7 +686,7 @@ variable_declaration :
 
 file_declaration :
 	reserved_word_file 
-		one_or_more_identifiers_separated_by_commas 
+		identifier_comma_identifier 
 	':'
 		subtype_indication
 		open_file_expression_is_string_expression_option(?)
@@ -729,6 +728,7 @@ component_declaration :
 	reserved_word_component 
 	component_name(?) 
 	';'  
+	| <error>
 
 attribute_declaration :
 	reserved_word_attribute 
@@ -751,11 +751,15 @@ attribute_specification :
 entity_name_list :
 	( reserved_word_others 
 	| reserved_word_all 
-	| list_of_id_or_char_or_op_with_optional_signature )
+	| id_char_op_comma_id_char_op )
 
-list_of_id_or_char_or_op_with_optional_signature :
-	<leftop: id_or_char_or_op_with_optional_signature /(,)/
-		 id_or_char_or_op_with_optional_signature>
+id_char_op_comma_id_char_op :
+	id_or_char_or_op_with_optional_signature
+	comma_id_or_char_or_op_with_optional_signature(s?)
+
+comma_id_or_char_or_op_with_optional_signature :
+	','
+	id_or_char_or_op_with_optional_signature
 
 id_or_char_or_op_with_optional_signature :
 	identifier_or_character_literal_or_operator_symbol
@@ -796,8 +800,15 @@ component_specification :
 reserved_word_others_all_or_one_or_more_instantiation_labels :
 	  reserved_word_others 
 	| reserved_word_all
-	| one_or_more_instantiation_labels_separated_by_commas
+	| instantiation_label_comma_instantiation_label
 
+instantiation_label_comma_instantiation_label :
+	instantiation_label
+	comma_instantiation_label(s?)
+
+comma_instantiation_label :
+	','
+	instantiation_label
 
 binding_indication : 
 	use_entity_or_configuration_or_open(?)
@@ -818,7 +829,7 @@ disconnection_specification :
 		(
 		  reserved_word_others
 		| reserved_word_all
-		| one_or_more_signals_separated_by_commas 
+		| signal_name_comma_signal_name 
 		)
 	':'
 		type_mark
@@ -834,11 +845,15 @@ group_template_declaration :
 	';'
 
 list_of_entity_class_with_optional_box_in_parens :
-	'(' list_of_entity_class_with_optional_box_operator ')'
+	'(' entity_class_box_comma_entity_class_box ')'
 
-list_of_entity_class_with_optional_box_operator :
-	<leftop: entity_class_with_optional_box_operator /(,)/
-	 entity_class_with_optional_box_operator>
+entity_class_box_comma_entity_class_box :
+	entity_class_with_optional_box_operator
+	comma_entity_class_with_optional_box_operator(s?)
+
+comma_entity_class_with_optional_box_operator :
+	','
+	entity_class_with_optional_box_operator
 
 entity_class_with_optional_box_operator :
 	entity_class
@@ -852,31 +867,45 @@ group_declaration :
 		identifier 
 	':' 
 		group_template_name 
-		'(' one_or_more_name_char_items_with_comma ')' 
+		'(' name_char_literal_comma_name_char_literal ')' 
 	';'
 
-one_or_more_name_char_items_with_comma :
-	<leftop: name_or_char_literal /(,)/ name_or_char_literal>
+name_char_literal_comma_name_char_literal :
+	name_or_char_literal 
+	comma_name_char_literal(s?)
+
+comma_name_char_literal :
+	','
+	name_or_char_literal
 
 name_or_char_literal :
 	( name | character_literal )
 
 use_clause : 
 	reserved_word_use 
-		one_or_more_selected_names_separated_by_commas 
+		selected_name_comma_selected_name 
 	';'
 
-one_or_more_selected_names_separated_by_commas :
-	<leftop: selected_name /(,)/ selected_name>
+selected_name_comma_selected_name :
+	selected_name
+	comma_selected_name(s?)
+
+comma_selected_name :
+	','
+	selected_name
 
 ####################################################
 ####################################################
 enumeration_type_definition :
-	'(' one_or_more_id_or_char_separated_by_commas ')'
+	'(' id_or_char_comma_id_or_char ')'
 
-one_or_more_id_or_char_separated_by_commas :
-	<leftop: identifier_or_character_literal /(,)/
-	 identifier_or_character_literal>
+id_or_char_comma_id_or_char :
+	identifier_or_character_literal
+	comma_id_or_char(s?)
+
+comma_id_or_char :
+	','
+	identifier_or_character_literal
 
 identifier_or_character_literal :
 	identifier | character_literal
@@ -922,19 +951,30 @@ array_type_definition :
 		element_subtype_indication
 
 array_type_mark_definition_or_array_discrete_range_definition : 
-	array_type_mark_definition | array_discrete_range_definition
+	  type_mark_range_box_comma_type_mark_range_box 
+	| array_discrete_range_definition
 
-array_type_mark_definition :
-	one_or_more_type_mark_ranges_separated_by_commas 
+type_mark_range_box_comma_type_mark_range_box :
+	type_mark_range_box
+	comma_type_mark_range_box(s?)
 
-one_or_more_type_mark_ranges_separated_by_commas :
-	<leftop: type_mark_range_box /(,)/ type_mark_range_box>
+comma_type_mark_range_box :
+	','
+	type_mark_range_box 
 
 type_mark_range_box :
 	type_mark reserved_word_range box_operator
 
 array_discrete_range_definition :
-	one_or_more_discrete_ranges_separated_by_commas
+	discrete_range_comma_discrete_range
+
+discrete_range_comma_discrete_range :
+	discrete_range
+	comma_discrete_range(s?)
+
+comma_discrete_range :
+	','
+	discrete_range
 
 record_type_definition :
 	reserved_word_record 
@@ -942,7 +982,7 @@ record_type_definition :
 	reserved_word_end reserved_word_record identifier(?)
 
 record_element_definition :
-	one_or_more_identifiers_separated_by_commas 
+	identifier_comma_identifier 
 	':'
 	subtype_indication 
 	';'
@@ -1055,13 +1095,13 @@ process_statement :
 	reserved_word_process 
 	process_label(?) 
 	';'
-
+	| <error>
 
 label_followed_by_colon : 
 	label ':'
 
 sensitivity_list :
-	'(' one_or_more_signals_separated_by_commas ')'
+	'(' signal_name_comma_signal_name ')'
 
 process_declarative_item :
 	  subprogram_declaration 
@@ -1118,14 +1158,19 @@ selected_signal_assignment :
 	'<='
 	reserved_word_guarded(?) 
 	delay_mechanism(?)
-		one_or_more_waveform_when_choices_comma_separated
+		waveform_when_choices_comma_waveform_when_choices
 	';'
 
-one_or_more_waveform_when_choices_comma_separated :
-	<leftop: waveform_when_choices /(,)/ waveform_when_choices>
+waveform_when_choices_comma_waveform_when_choices :
+	waveform_when_choices
+	comma_waveform_when_choices(s?)
+
+comma_waveform_when_choices :
+	','
+	waveform_when_choices
 
 waveform_when_choices :
-	waveform_rule reserved_word_when choices_separated_by_pipe 
+	waveform_rule reserved_word_when choices_pipe_choices 
 
 conditional_signal_assignment :
 	name_or_aggregate 
@@ -1148,14 +1193,19 @@ when_boolean_expression_else_waveform_rule :
 component_instantiation_statement :
 	instantiation_label 
 	':'
-	(
-		reserved_word_entity_and_entity_name_arch_name_in_parens |
-		reserved_word_configuration_and_configuration_name |
-		reserved_word_component_and_component_name 
-	)
+	entity_configuration_component
 	generic_map_section(?)
 	port_map_section(?)
 	';'
+	| <error>
+
+	
+entity_configuration_component :
+	reserved_word_entity_and_entity_name_arch_name_in_parens |
+	reserved_word_configuration_and_configuration_name |
+	reserved_word_component_and_component_name 
+
+
 
 reserved_word_entity_and_entity_name_arch_name_in_parens :
 	reserved_word_entity 
@@ -1217,6 +1267,7 @@ sequential_statement :
 	| exit_statement 
 	| return_statement 
 	| null_statement
+	| <error>
 
 wait_statement :
 	label_followed_by_colon(?)
@@ -1236,7 +1287,7 @@ reserved_word_for_and_time_expression :
 
 on_list_of_signal :
  	reserved_word_on 
-		one_or_more_signals_separated_by_commas
+		signal_name_comma_signal_name
 
 assertion_statement :
 	label_followed_by_colon(?)
@@ -1280,10 +1331,15 @@ reserved_word_reject_and_time_expression :
 
 waveform_rule :
 	  reserved_word_unaffected 
-	| one_or_more_waveform_items_separated_by_commas
+	| waveform_item_comma_waveform_item
 
-one_or_more_waveform_items_separated_by_commas :
-	<leftop: waveform_item /(,)/ waveform_item> 
+waveform_item_comma_waveform_item :
+	waveform_item
+	comma_waveform_item(s?)
+
+comma_waveform_item :
+	','
+	waveform_item
 
 waveform_item :
 	  null_with_optional_after_time_expression 
@@ -1313,6 +1369,7 @@ procedure_call_statement :
 		procedure_name 
 		subprogram_parameter_section(?) 
 	';'
+	| <error>
 
 if_statement :
 	label_followed_by_colon(?)
@@ -1326,6 +1383,7 @@ if_statement :
 	reserved_word_if 
 	if_label(?) 
 	';'
+	| <error>
 
 optional_elsif_section :
 	reserved_word_elsif 
@@ -1345,7 +1403,7 @@ case_statement :
 
 when_choices_sequential_statement :
 	reserved_word_when 
-		choices_separated_by_pipe 
+		choices_pipe_choices 
 	'=>' 
 		sequential_statement(s)
 
@@ -1404,7 +1462,15 @@ null_statement :
 # E.7 Interfaces and Associations
 ####################################################
 interface_list :
-	<leftop: interface_item /(;)/ interface_item>
+	interface_item_comma_interface_item
+
+interface_item_comma_interface_item :
+	interface_item
+	comma_interface_item(s?)
+
+comma_interface_item :
+	','
+	interface_item
 
 interface_item :
 	  constant_interface 
@@ -1414,7 +1480,7 @@ interface_item :
 
 constant_interface :
 	reserved_word_constant(?) 
-		one_or_more_identifiers_separated_by_commas 
+		identifier_comma_identifier 
 	':' 
 	reserved_word_in(?) 
 		subtype_indication 
@@ -1424,7 +1490,7 @@ constant_interface :
 
 signal_interface :
 	reserved_word_signal(?) 
-		one_or_more_identifiers_separated_by_commas 
+		identifier_comma_identifier 
 	':' 
 		mode(?) 
 		subtype_indication 
@@ -1434,7 +1500,7 @@ signal_interface :
 
 variable_interface :
 	reserved_word_variable(?) 
-		one_or_more_identifiers_separated_by_commas 
+		identifier_comma_identifier 
 	':' 
 		mode(?) 
 		subtype_indication 
@@ -1443,7 +1509,7 @@ variable_interface :
 
 file_interface :
 	reserved_word_file 
-		one_or_more_identifiers_separated_by_commas 
+		identifier_comma_identifier 
 	':'
 		subtype_indication 
 	';'
@@ -1456,11 +1522,19 @@ mode :
 	| reserved_word_linkage 
 
 association_list :
-	<leftop: actual_part_with_optional_formal_part /(,)/
-	 actual_part_with_optional_formal_part>
+	actual_formal_comma_actual_formal
+	| <error>
+
+actual_formal_comma_actual_formal :
+	actual_part_with_optional_formal_part
+	comma_actual_part_with_optional_formal_part(s?)
+
+comma_actual_part_with_optional_formal_part :
+	','
+	actual_part_with_optional_formal_part
 
 actual_part_with_optional_formal_part :
-	formal_part_and_arrow 
+	formal_part_and_arrow(?) 
 		actual_part
 
 formal_part_and_arrow :
@@ -1520,12 +1594,12 @@ logic_relation :
 	relation
 
 logic_relation_operator : 
-	  reserved_word_and 
-	| reserved_word_nand 
-	| reserved_word_or 
+	  reserved_word_nand 
+	| reserved_word_xnor 
+	| reserved_word_and 
 	| reserved_word_nor 
 	| reserved_word_xor 
-	| reserved_word_xnor 
+	| reserved_word_or 
 
 relation :
 	shift_expression 
@@ -1536,7 +1610,12 @@ relation_shift_expression :
 	shift_expression 
 
 relation_operator : 
-	'=' | '/=' | '<' | '<=' | '>' | '>='
+	  '/=' 
+	| '<=' 
+	| '>='
+	| '=' 
+	| '>' 
+	| '<' 
 
 shift_expression :
 	simple_expression 
@@ -1599,44 +1678,76 @@ primary_exp_primary :
 exponent_primary :
 	'**' primary 
 
+
+# notes:
+#
+# the rules for "primary" is not mutually exclusive:
+# there are rules that apply such that a given input text
+# could be one of two different possible interpretations.
+#
+# there is no way to distinguish between the two possibilities
+# by simply looking at the token being examined.
+#
+# 1)
+#
+# aggregate : '(' optional_choice_arrow(?) expression_rule [ ',' repeat ] ')'
+# expression in paren : '(' expression_rule ')' 
+#
+# therefore an aggregate with one entry and no choice arrow is
+# indistinguishable from an expression in paren.
+#
+#
+# 2)
+#
+#  function_call       # token ( param=>(?) value [,repeat])(?)
+#  literal->identifier # token
+#
+# therefore a function call with no input parameters is
+# indistinguishable from a literal identifier.
+
+
 primary : 
-	  name 
-	| aggregate
-	| primary_literal
-	| function_call 
-	| qualified_expression 
-	| type_conversion 
-	| allocator 
-	| '(' expression_rule ')' 
+	  new_qualified_expression  # 'new' token ' ( yada )
+	| new_subtype_indication    # 'new' token
+	| qualified_expression   # token ' ( yada )
+	| function_call 	 # token ( param=>(?) value [,repeat])(?)
+	| literal
+	| aggregate	# '(' choice=>(?) expression [,repeat] ')'
+	| expression_rule_in_parens 
+	| name 
 
-primary_literal : super_sub_literal
-
-super_sub_literal : literal
-
-type_conversion :
-	type_mark '(' expression_rule ')'
-
-allocator :
+new_qualified_expression :
 	reserved_word_new 
-	subtype_indication_or_qualified_expression
+	qualified_expression
 
-subtype_indication_or_qualified_expression :
-	  subtype_indication 
-	| qualified_expression
-
-function_call : 
-	function_name 
-	subprogram_parameter_section(?)
+new_subtype_indication :
+	reserved_word_new 
+	subtype_indication
 
 qualified_expression :
-	  type_mark_tick_expression 
-	| type_mark_tick_aggregate
+	  type_mark_tick_aggregate   
+	| type_mark_tick_expression  
 
 type_mark_tick_expression :
 	type_mark "'" '(' expression_rule ')'
 
 type_mark_tick_aggregate :
 	type_mark "'" aggregate
+
+#
+# temporary patch, don't allow function calls without a parameter list
+#  in parenthesis. this will prevent identifiers from being mistaken
+#  for function calls with no parameters.
+#
+# this means that functions with no parameters will be mistaken
+# for identifiers. at least until this is fixed somehow.
+#
+function_call : 
+	function_name 
+	subprogram_parameter_section	#(?) 
+
+expression_rule_in_parens : 
+	'(' expression_rule ')'
 
 # left recursion here.
 # name = ( name | functionname) ... | (name | functioncall) 
@@ -1645,12 +1756,20 @@ name :
 	  attribute_name 
 	| operator_symbol 
 	| selected_name 
-	| identifier_paren_one_or_more_expressions_separated_by_commas
+	| identifier_paren_one_or_expression_rule_comma_expression_rule
 	| identifier_paren_discrete_range
 	| identifier
 
-identifier_paren_one_or_more_expressions_separated_by_commas : 
-	identifier '(' one_or_more_expressions_separated_by_commas ')'
+identifier_paren_one_or_expression_rule_comma_expression_rule : 
+	identifier '(' expression_rule_comma_expression_rule ')'
+
+expression_rule_comma_expression_rule :
+	expression_rule
+	comma_expression_rule(s?)
+
+comma_expression_rule :
+	','
+	expression_rule
 
 identifier_paren_discrete_range : 
 	identifier '(' discrete_range ')'
@@ -1671,45 +1790,62 @@ attribute_name :
 
 signature :
 	'[' 
-	one_or_more_type_marks_separated_by_commas(?)  
+	type_mark_comma_type_mark(?)  
 	reserved_word_return_and_type_mark(?)
 	']'
+
+type_mark_comma_type_mark :
+	type_mark
+	comma_type_mark(s?)
+
+comma_type_mark :
+	','
+	type_mark
 
 reserved_word_return_and_type_mark :
 	reserved_word_return 
 	type_mark
 
 literal :
-	  character_literal
+	  reserved_word_null
+	| character_literal
 	| string_literal 
 	| bit_string_literal 
-	| identifier
-	| decimal_literal 
-	| based_literal 
-	| decimal_or_based_unit_name 
-	| reserved_word_null
+	| based_literal_unit_name
+	| decimal_literal_unit_name
 
-decimal_or_based_unit_name :
-	decimal_literal_or_based_literal 
-	unit_name 
+character_literal :
+	"'" graphic_character "'" 
 
-decimal_literal_or_based_literal :
-	decimal_literal | based_literal
+string_literal :
+	'"' graphic_character(s) '"'
 
-decimal_literal : 
+bit_string_literal :
+	b_or_o_or_x '"' based_integer '"'
+
+b_or_o_or_x :
+	'B' | 'O' | 'X'
+
+decimal_literal_unit_name : 
 	integer
 	optional_fractional_part(?)
 	optional_sci_notation(?)
+	unit_name(?)
+
+based_literal_unit_name :
+	integer 
+	'#' 
+	based_integer optional_based_fraction_part(?) 
+	'#' 
+	optional_based_sci_notation(?)
+	unit_name(?)
+
 
 optional_fractional_part :
 	  '.' integer
 
 optional_sci_notation :
 	 'E' sign(?) integer
-
-based_literal :
-	integer '#' based_integer optional_based_fraction_part(?) 
-	'#' optional_based_sci_notation(?)
 
 optional_based_fraction_part :
 	'.' based_integer 
@@ -1721,36 +1857,34 @@ integer :
 	/\d+/
 
 based_integer :
-	one_or_more_digit_letters_possibly_separated_by_underscores
+	/[A-Za-z0-9][A-Za-z0-9_]/
 
-character_literal :
-	"'" graphic_character "'" 
-
-string_literal :
-	'"' graphic_character(s) '"'
-
-bit_string_literal :
-	( 'B' | 'O' | 'X' ) '"' based_integer '"'
 
 aggregate :
-	'(' one_or_more_choice_expressions_separated_by_commas ')' 
+	'(' choice_expression_comma_choice_expression ')' 
 
-one_or_more_choice_expressions_separated_by_commas : 
-	<leftop: optional_choice_arrow_with_expression
-	 /(,)/ optional_choice_arrow_with_expression>
+choice_expression_comma_choice_expression :
+	optional_choice_arrow_with_expression
+	comma_optional_choice_arrow_with_expression(s?)
+
+comma_optional_choice_arrow_with_expression :
+	','
+	optional_choice_arrow_with_expression
 
 optional_choice_arrow_with_expression :
 	optional_choice_arrow(?)
 	expression_rule 
 
 optional_choice_arrow :
-	choices_separated_by_pipe '=>'
+	choices_pipe_choices '=>'
 
-choices_separated_by_pipe :
-	<leftop: one_of_several_choices pipe one_of_several_choices>
+choices_pipe_choices :
+	one_of_several_choices
+	pipe_one_of_several_choices(s?)
 
-pipe : 
+pipe_one_of_several_choices :
 	'|'
+	one_of_several_choices
 
 one_of_several_choices :
 	reserved_word_others | simple_expression | discrete_range | identifier  
@@ -1762,13 +1896,24 @@ label : identifier
 
 identifier : /[A-Za-z][A-Za-z_0-9]*/ 
 
+
+####
+#### this needs some polish, need to disable whitespace
+#### so that can accept a string literal of " " as valid
+####
 graphic_character :
-	/[A-Za-z0-9\-~`!@#$%^&*()_+={};:',.<>|]/
+	
+	/[ A-Za-z0-9\-~`!@#$%^&*()_+={};:',.<>|]/
 ####################################################
 # misc
 ####################################################
-one_or_more_identifiers_separated_by_commas : 
-	<leftop: identifier /(,)/ identifier>
+identifier_comma_identifier : 
+	identifier
+	comma_identifier(s?)
+
+comma_identifier :
+	','
+	identifier
 
 entity_name : identifier 
 
@@ -1777,69 +1922,103 @@ entity_name : identifier
 ####
 generic_declaration_section : 
 	reserved_word_generic generic_interface_list(?) ';'
-
+	| <error>
 
 generic_interface_list : 
 	'('
- one_or_more_generic_interface_list_entries_separated_by_semicolons 
+	 generic_interface_list_entry_semicolon_generic_interface_list_entry
 	')' 
+	| <error>
 
-one_or_more_generic_interface_list_entries_separated_by_semicolons : 
-	<leftop: generic_interface_list_entry /(;)/
-	 generic_interface_list_entry> 
+generic_interface_list_entry_semicolon_generic_interface_list_entry :
+	generic_interface_list_entry
+	semicolon_generic_interface_list_entry(s?)
+	| <error>
+
+semicolon_generic_interface_list_entry :
+	';'
+	generic_interface_list_entry
+	| <error>
 
 generic_interface_list_entry : 
-	one_or_more_identifiers_separated_by_commas ':'
+	identifier_comma_identifier ':'
 	subtype_indication 
 	default_value(?) 
+	| <error>
 
 default_value : 
 	':=' static_expression
+	| <error>
 
 generic_map_section : 
-	reserved_word_generic reserved_word_map optional_generic_association_list(?)   
+	reserved_word_generic 
+	reserved_word_map 
+	optional_generic_association_list(?)   
+	| <error>
 
 optional_generic_association_list :
 	'(' generic_association_list ')' 
+	| <error>
 
 generic_association_list : 
 	association_list 
+	| <error>
 
 
 ####
 # ports
 ####
 port_declaration_section : 
-	reserved_word_port port_interface_list(?) ';'
+	reserved_word_port 
+	port_interface_list(?) ';'
+	| <error>
 
 port_interface_list : 
 	'('
- one_or_more_port_interface_list_entries_separated_by_semicolons
+ 	port_interface_list_entry_semicolon_port_interface_list_entry
 	 ')' 
+	| <error>
 
-one_or_more_port_interface_list_entries_separated_by_semicolons : 
-	<leftop: port_interface_list_entry /(;)/
-	 port_interface_list_entry>  
+port_interface_list_entry_semicolon_port_interface_list_entry :
+	port_interface_list_entry
+	semicolon_port_interface_list_entry(s?)
+	| <error>
+
+semicolon_port_interface_list_entry :
+	';'
+	port_interface_list_entry
+		| <error>
 
 port_interface_list_entry : 
-	one_or_more_ports_separated_by_commas ':'
+	port_name_comma_port_name 
+	':'
 	mode
 	subtype_indication 
 	default_value(?)  
+	| <error>
 
-one_or_more_ports_separated_by_commas :
-	<leftop: port_name /(,)/ port_name>
+port_name_comma_port_name :
+	port_name
+	comma_port_name(s?)
+	| <error>
 
-
+comma_port_name :
+	','
+	port_name
 
 port_map_section : 
-	reserved_word_port reserved_word_map optional_port_association_list(?)   
+	reserved_word_port 
+	reserved_word_map 
+	optional_port_association_list(?)   
+	| <error>
 
 optional_port_association_list :
 	'(' port_association_list ')' 
+	| <error>
 
 port_association_list : 
 	association_list 
+	| <error>
 
 ####
 # parameters to procedure/function call
@@ -1853,55 +2032,25 @@ parameter_association_list :
 ####
 # instance labels
 ####
-one_or_more_instantiation_labels_separated_by_commas :
-	<leftop: instantiation_label /(,)/ instantiation_label>
 
 instantiation_label : identifier 
 
 ####
 # signals
 ####
-one_or_more_signals_separated_by_commas :
-	<leftop: signal_name /(,)/ signal_name>
+signal_name_comma_signal_name :
+	signal_name
+	comma_signal_name(s?)
+
+comma_signal_name :
+	','
+	signal_name
 
 signal_name : identifier
 
-####
-# discrete range
-####
-one_or_more_discrete_ranges_separated_by_commas :
-	<leftop: discrete_range /(,)/ discrete_range>
-
-####
-# expressions
-####
-one_or_more_expressions_separated_by_commas :
-	<leftop: expression_rule /(,)/ expression_rule>
-
-####
-# type_marks
-####
-one_or_more_type_marks_separated_by_commas :
-	<leftop: type_mark /(,)/ type_mark>
-
-
-####
-# digits
-####
-one_or_more_digits_possibly_separated_by_underscores :
-	<leftop: digit /(_)/ digit>
 
 digit :
 	/[0-9]/
-
-####
-# digit_letter
-####
-one_or_more_digit_letters_possibly_separated_by_underscores :
-	<leftop: digit_letter /(_)/ digit_letter>
-
-digit_letter :
-	/[A-Za-z0-9]/
 
 
 
@@ -1925,7 +2074,6 @@ type_name : identifier
 subtype_name : identifier
 generate_label : identifier
 resolution_function_name : identifier 
-unit_name : identifier
 physical_literal : identifier
 
 range_attribute_name : attribute_name
@@ -1933,7 +2081,7 @@ range_attribute_name : attribute_name
 guard_expression : expression_rule
 value_expression : expression_rule 
 string_expression : expression_rule
-time_expression : expression_rule time_units
+time_expression : expression_rule 
 file_open_kind_expression : expression_rule
 
 static_expression : identifier
@@ -1942,6 +2090,19 @@ element_subtype_indication : subtype_indication
 
 time_units : 
 	'fs' | 'ps' | 'ns' | 'us' | 'ms' | 'sec' | 'min' | 'hr'
+
+
+# given:
+# (1 downto 0)
+# 
+# the '1 downto' gets confused as a decimal_literal_unit_name
+# where 'downto' is the unit_name.
+#
+# unit_name is generally just an identifier, but to keep
+# 'to' or 'downto' or similar confusions,
+# unit_name will need to know the valid units available.
+#
+unit_name : time_units
 
 #END_OF_GRAMMAR
 
@@ -2113,6 +2274,30 @@ hierarchical browser of a VHDL design.
 This module is currently in Beta release. All code is subject to change.
 Bug reports are welcome.
 
+
+
+DSLI information:
+
+
+D - Development Stage
+
+	a - alpha testing
+
+S - Support Level
+
+	d - developer
+
+L - Language used
+
+	p - perl only, no compiler needed, should be platform independent
+
+I - Interface Style
+
+	O - Object oriented using blessed references and / or inheritance
+
+
+
+
 =head1 AUTHOR
 
 
@@ -2125,7 +2310,7 @@ email contact: greg42@bellatlantic.net
 
 =head1 SEE ALSO
 
-Parse::RecDescent
+Parse::RecDescent version 1.77
 
 perl(1).
 

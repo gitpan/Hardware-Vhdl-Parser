@@ -11,3 +11,7 @@ Revision history for Perl extension Hardware::Vhdl::Parser.
 	- add comment to test1.vhd file
 	- fixed bug in grammar for configuration specification
 	- fixed missing '}' in test.pl
+
+0.10 10 Feb 2000
+	- got rid of <leftop> directives
+	- trying to restructure expression_rule to be cleaner

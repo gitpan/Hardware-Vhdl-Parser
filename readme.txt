@@ -30,8 +30,9 @@ this should print out:
 INSTANCENAME DUT 
 
 
+
 PLEASE NOTE: the script takes some time to simply load the grammar.
-the it takes about half a minute (yes, 30 seconds) to run the 
+the it takes about a minute (yes, 60 seconds) to run the 
 hierarchy.pl test1.vhd command shown above when run on an Ultra 60.
 your performance may vary.
 

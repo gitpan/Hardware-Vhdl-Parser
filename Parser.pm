@@ -20,7 +20,7 @@ use vars qw($VERSION @ISA);
 
 @ISA = ( 'Parse::RecDescent' );
 
-$VERSION = '0.08';
+$VERSION = '0.09';
 #########################################################################
 
 
@@ -755,7 +755,7 @@ entity_name_list :
 
 list_of_id_or_char_or_op_with_optional_signature :
 	<leftop: id_or_char_or_op_with_optional_signature /(,)/
-		 id_or_char_or_op_with_optional_signature>(?)
+		 id_or_char_or_op_with_optional_signature>
 
 id_or_char_or_op_with_optional_signature :
 	identifier_or_character_literal_or_operator_symbol
@@ -838,7 +838,7 @@ list_of_entity_class_with_optional_box_in_parens :
 
 list_of_entity_class_with_optional_box_operator :
 	<leftop: entity_class_with_optional_box_operator /(,)/
-	 entity_class_with_optional_box_operator>(?)
+	 entity_class_with_optional_box_operator>
 
 entity_class_with_optional_box_operator :
 	entity_class
@@ -856,7 +856,7 @@ group_declaration :
 	';'
 
 one_or_more_name_char_items_with_comma :
-	<leftop: name_or_char_literal /(,)/ name_or_char_literal>(?)
+	<leftop: name_or_char_literal /(,)/ name_or_char_literal>
 
 name_or_char_literal :
 	( name | character_literal )
@@ -867,7 +867,7 @@ use_clause :
 	';'
 
 one_or_more_selected_names_separated_by_commas :
-	<leftop: selected_name /(,)/ selected_name>(?)
+	<leftop: selected_name /(,)/ selected_name>
 
 ####################################################
 ####################################################
@@ -876,7 +876,7 @@ enumeration_type_definition :
 
 one_or_more_id_or_char_separated_by_commas :
 	<leftop: identifier_or_character_literal /(,)/
-	 identifier_or_character_literal>(?)
+	 identifier_or_character_literal>
 
 identifier_or_character_literal :
 	identifier | character_literal
@@ -928,7 +928,7 @@ array_type_mark_definition :
 	one_or_more_type_mark_ranges_separated_by_commas 
 
 one_or_more_type_mark_ranges_separated_by_commas :
-	<leftop: type_mark_range_box /(,)/ type_mark_range_box>(?)
+	<leftop: type_mark_range_box /(,)/ type_mark_range_box>
 
 type_mark_range_box :
 	type_mark reserved_word_range box_operator
@@ -1122,7 +1122,7 @@ selected_signal_assignment :
 	';'
 
 one_or_more_waveform_when_choices_comma_separated :
-	<leftop: waveform_when_choices /(,)/ waveform_when_choices>(?)
+	<leftop: waveform_when_choices /(,)/ waveform_when_choices>
 
 waveform_when_choices :
 	waveform_rule reserved_word_when choices_separated_by_pipe 
@@ -1283,7 +1283,7 @@ waveform_rule :
 	| one_or_more_waveform_items_separated_by_commas
 
 one_or_more_waveform_items_separated_by_commas :
-	<leftop: waveform_item /(,)/ waveform_item>(?) 
+	<leftop: waveform_item /(,)/ waveform_item> 
 
 waveform_item :
 	  null_with_optional_after_time_expression 
@@ -1404,7 +1404,7 @@ null_statement :
 # E.7 Interfaces and Associations
 ####################################################
 interface_list :
-	<leftop: interface_item /(;)/ interface_item>(?)
+	<leftop: interface_item /(;)/ interface_item>
 
 interface_item :
 	  constant_interface 
@@ -1457,7 +1457,7 @@ mode :
 
 association_list :
 	<leftop: actual_part_with_optional_formal_part /(,)/
-	 actual_part_with_optional_formal_part>(?)
+	 actual_part_with_optional_formal_part>
 
 actual_part_with_optional_formal_part :
 	formal_part_and_arrow 
@@ -1737,7 +1737,7 @@ aggregate :
 
 one_or_more_choice_expressions_separated_by_commas : 
 	<leftop: optional_choice_arrow_with_expression
-	 /(,)/ optional_choice_arrow_with_expression>(?)
+	 /(,)/ optional_choice_arrow_with_expression>
 
 optional_choice_arrow_with_expression :
 	optional_choice_arrow(?)
@@ -1747,7 +1747,7 @@ optional_choice_arrow :
 	choices_separated_by_pipe '=>'
 
 choices_separated_by_pipe :
-	<leftop: one_of_several_choices pipe one_of_several_choices>(?)
+	<leftop: one_of_several_choices pipe one_of_several_choices>
 
 pipe : 
 	'|'
@@ -1768,7 +1768,7 @@ graphic_character :
 # misc
 ####################################################
 one_or_more_identifiers_separated_by_commas : 
-	<leftop: identifier /(,)/ identifier>(?)
+	<leftop: identifier /(,)/ identifier>
 
 entity_name : identifier 
 
@@ -1786,7 +1786,7 @@ generic_interface_list :
 
 one_or_more_generic_interface_list_entries_separated_by_semicolons : 
 	<leftop: generic_interface_list_entry /(;)/
-	 generic_interface_list_entry>(?) 
+	 generic_interface_list_entry> 
 
 generic_interface_list_entry : 
 	one_or_more_identifiers_separated_by_commas ':'
@@ -1819,7 +1819,7 @@ port_interface_list :
 
 one_or_more_port_interface_list_entries_separated_by_semicolons : 
 	<leftop: port_interface_list_entry /(;)/
-	 port_interface_list_entry>(?)  
+	 port_interface_list_entry>  
 
 port_interface_list_entry : 
 	one_or_more_ports_separated_by_commas ':'
@@ -1828,7 +1828,7 @@ port_interface_list_entry :
 	default_value(?)  
 
 one_or_more_ports_separated_by_commas :
-	<leftop: port_name /(,)/ port_name>(?)
+	<leftop: port_name /(,)/ port_name>
 
 
 
@@ -1854,7 +1854,7 @@ parameter_association_list :
 # instance labels
 ####
 one_or_more_instantiation_labels_separated_by_commas :
-	<leftop: instantiation_label /(,)/ instantiation_label>(?)
+	<leftop: instantiation_label /(,)/ instantiation_label>
 
 instantiation_label : identifier 
 
@@ -1862,7 +1862,7 @@ instantiation_label : identifier
 # signals
 ####
 one_or_more_signals_separated_by_commas :
-	<leftop: signal_name /(,)/ signal_name>(?)
+	<leftop: signal_name /(,)/ signal_name>
 
 signal_name : identifier
 
@@ -1870,26 +1870,26 @@ signal_name : identifier
 # discrete range
 ####
 one_or_more_discrete_ranges_separated_by_commas :
-	<leftop: discrete_range /(,)/ discrete_range>(?)
+	<leftop: discrete_range /(,)/ discrete_range>
 
 ####
 # expressions
 ####
 one_or_more_expressions_separated_by_commas :
-	<leftop: expression_rule /(,)/ expression_rule>(?)
+	<leftop: expression_rule /(,)/ expression_rule>
 
 ####
 # type_marks
 ####
 one_or_more_type_marks_separated_by_commas :
-	<leftop: type_mark /(,)/ type_mark>(?)
+	<leftop: type_mark /(,)/ type_mark>
 
 
 ####
 # digits
 ####
 one_or_more_digits_possibly_separated_by_underscores :
-	<leftop: digit /(_)/ digit>(?)
+	<leftop: digit /(_)/ digit>
 
 digit :
 	/[0-9]/
@@ -1898,7 +1898,7 @@ digit :
 # digit_letter
 ####
 one_or_more_digit_letters_possibly_separated_by_underscores :
-	<leftop: digit_letter /(_)/ digit_letter>(?)
+	<leftop: digit_letter /(_)/ digit_letter>
 
 digit_letter :
 	/[A-Za-z0-9]/
@@ -2088,7 +2088,7 @@ __END__
 
 =head1 NAME
 
-Hardware::Vhdl::Parser - Perl extension for parsing VHDL code
+Hardware::Vhdl::Parser - A complete grammar for parsing VHDL code using perl
 
 =head1 SYNOPSIS
 
@@ -2106,24 +2106,29 @@ which run through VHDL code and perform specific functions.
 
 For example, a Hierarchy.pm uses Hardware::Vhdl::Parser to overload the
 grammar rule for component instantiations. This single modification
-will print out all instance names that occur in the module being parsed.
+will print out all instance names that occur in the file being parsed.
 This might be useful for creating an automatic build script, or a graphical
 hierarchical browser of a VHDL design.
 
+This module is currently in Beta release. All code is subject to change.
+Bug reports are welcome.
+
 =head1 AUTHOR
 
-Greg London  greg42@bellatlantic.net
 
-##################################################################
-# Copyright (C) 2000 Greg London   All Rights Reserved.
-# This program is free software; you can redistribute it and/or
-# modify it under the same terms as Perl itself.
-##################################################################
+Copyright (C) 2000 Greg London   All Rights Reserved.
+
+This program is free software; you can redistribute it and/or
+modify it under the same terms as Perl itself.
+
+email contact: greg42@bellatlantic.net
 
 =head1 SEE ALSO
 
-perl(1).
 Parse::RecDescent
+
+perl(1).
+
 
 =cut
 

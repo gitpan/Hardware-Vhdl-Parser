@@ -11,7 +11,7 @@ use Hardware::Vhdl::Parser;
 @ISA = ( 'Hardware::Vhdl::Parser' );
 ##################################################################
 use vars qw ( $VERSION );
-$VERSION = '0.01';
+$VERSION = '0.02';
 ##################################################################
 
 ##################################################################
@@ -37,7 +37,14 @@ component_instantiation_statement :
 	';'
 
 		{ print "INSTANCENAME $item{instantiation_label} \n"; }
+
+entity_name : identifier 
+		{ print "ENTITY_NAME $item{identifier} \n"; }
+
  ));
+
+
+
 
 
  # bless it as a vhdl_hierarchy object

@@ -20,7 +20,7 @@ use vars qw($VERSION @ISA);
 
 @ISA = ( 'Parse::RecDescent' );
 
-$VERSION = '0.07';
+$VERSION = '0.08';
 #########################################################################
 
 
@@ -47,6 +47,24 @@ sub new
 sub grammar
 ##################################################################
 {
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -377,6 +395,8 @@ reserved_word_xnor :
 reserved_word_xor : 
 	/xor/i
 
+
+
 eofile : /^\Z/
 
 ####################################################
@@ -416,12 +436,17 @@ selected_name_list :
 ####################################################
 
 entity_declaration : 
-	reserved_word_entity entity_name reserved_word_is 
-	optional_generic_declaration_section(?)
-	optional_port_declaration_section(?)
+	reserved_word_entity 
+	entity_name 
+	reserved_word_is 
+	generic_declaration_section(?)
+	port_declaration_section(?)
 	entity_declaritive_item(?)
 	begin_entity_section(?)
-	reserved_word_end ( reserved_word_entity )(?) identifier(?) ';'  
+	reserved_word_end 
+	reserved_word_entity(?) 
+	identifier(?) 
+	';'  
 	 
 
 begin_entity_section :
@@ -437,12 +462,10 @@ passive_process_statement :
 	process_statement
 
 entity_declaritive_item : 
-	  subprogram_declaration 
-	| subprogram_body 
+	| signal_declaration 
+	| constant_declaration 
 	| type_declaration 
 	| subtype_declaration 
-	| constant_declaration 
-	| signal_declaration 
 	| shared_variable_declaration 
 	| file_declaration 
 	| alias_declaration 
@@ -452,32 +475,62 @@ entity_declaritive_item :
 	| use_clause 
 	| group_template_declaration 
 	| group_declaration 
+	| subprogram_declaration 
+	| subprogram_body 
 
 architecture_body :
-	reserved_word_architecture identifier reserved_word_of entity_name reserved_word_is
+	reserved_word_architecture 
+		identifier 
+	reserved_word_of 
+		entity_name 
+	reserved_word_is
 		block_declarative_item(s?)
 	reserved_word_begin
 		concurrent_statement(s?)
-	reserved_word_end ( reserved_word_architecture )(?) identifier(?) ';' 
+	reserved_word_end 
+	reserved_word_architecture(?) 
+	identifier(?) 
+	';' 
+	| <error> 
 
 configuration_declaration :
-	reserved_word_configuration identifier reserved_word_of entity_name reserved_word_is
-		(   use_clause  
-		  | attribute_specification
-		  | group_declaration )
+	reserved_word_configuration 
+		identifier 
+	reserved_word_of 
+		entity_name 
+	reserved_word_is
+		use_clause_or_attribute_specification_or_group_declaration(s?)
 		block_configuration
-	reserved_word_end ( reserved_word_configuration )(?) identifier(?) ';' 
+	reserved_word_end 
+	reserved_word_configuration(?) 
+	identifier(?) 
+	';' 
+
+use_clause_or_attribute_specification_or_group_declaration : 
+	  use_clause 
+	| attribute_specification 
+	| group_declaration
+
 
 block_configuration : 
-	reserved_word_for architecture_name
+	reserved_word_for 
+		architecture_name
 	use_clause(?)
-	reserved_word_end reserved_word_for ';'
+	reserved_word_end 
+	reserved_word_for 
+	';'
 
 package_declaration :
-	reserved_word_package identifier reserved_word_is
+	reserved_word_package 
+		identifier 
+	reserved_word_is
 		package_declarative_item(s?)
-	reserved_word_end ( reserved_word_package )(?) identifier(?) ';'  
-	
+	reserved_word_end 
+	reserved_word_package(?) 
+	identifier(?) 
+	';'  
+	| <error> 
+
 package_declarative_item :
 	  subprogram_declaration 
 	| type_declaration 
@@ -496,9 +549,20 @@ package_declarative_item :
 	| group_declaration 
 
 package_body :
-	reserved_word_package reserved_word_body identifier reserved_word_is
+	reserved_word_package 
+	reserved_word_body 
+		identifier 
+	reserved_word_is
 		package_body_declarative_item(s?)
-	reserved_word_end ( reserved_word_package reserved_word_body )(?) identifier(?) ';' 
+	reserved_word_end 
+	reserved_word_package_and_body(?) 
+	identifier(?) 
+	';' 
+	| <error> 
+
+reserved_word_package_and_body :
+	reserved_word_package 
+	reserved_word_body
 
 package_body_declarative_item :
 	  subprogram_body 
@@ -516,33 +580,45 @@ package_body_declarative_item :
 ####################################################
 ####################################################
 
-subprogram_declaration : subprogram_specification ';' 
+subprogram_declaration : 
+	subprogram_specification 
+	';' 
 
 subprogram_specification :
-	( procedure_specification | function_specification ) 
+	procedure_specification | function_specification 
 
 procedure_specification :
-	reserved_word_procedure ( identifier | operator_symbol )
-	optional_parameter_section(?) 
+	reserved_word_procedure 
+		identifier_or_operator_symbol
+		subprogram_parameter_section(?) 
+
+identifier_or_operator_symbol :
+	identifier | operator_symbol
 
 function_specification :
 	pure_or_impure(?) 
 	reserved_word_function 
-	( identifier | operator_symbol ) 
-	optional_parameter_section(?) 
+		identifier_or_operator_symbol 
+		subprogram_parameter_section(?) 
 	reserved_word_return
-	type_mark 
+		type_mark 
 
 pure_or_impure :
-	( reserved_word_pure | reserved_word_impure )
+	reserved_word_pure | reserved_word_impure
 
 subprogram_body :
-	subprogram_specification reserved_word_is
+	subprogram_specification 
+	reserved_word_is
 		subprogram_declarative_part(?)
 	reserved_word_begin
 		sequential_statement(s?)
-	reserved_word_end ( reserved_word_function | reserved_word_procedure )(?)
-	( identifier | operator_symbol )(?) ';' 
+	reserved_word_end 
+	reserved_word_function_or_procedure(?)
+	identifier_or_operator_symbol(?) 
+	';' 
+
+reserved_word_function_or_procedure : 
+	reserved_word_function | reserved_word_procedure
 
 subprogram_declarative_part :
 	  subprogram_declaration 
@@ -558,7 +634,14 @@ subprogram_declarative_part :
 	| group_declaration  
 
 type_declaration :
-	reserved_word_type identifier ( reserved_word_is type_definition )(?) ';' 
+	reserved_word_type 
+		identifier 
+	is_type_definition(?) 
+	';' 
+
+is_type_definition : 
+	reserved_word_is 
+		type_definition
 
 type_definition : 
 	  enumeration_type_definition
@@ -571,121 +654,206 @@ type_definition :
 	| file_type_definition 
 
 constant_declaration :
-	reserved_word_constant one_or_more_identifiers_separated_by_commas ':'
-	subtype_indication 
-	default_value(?) ';' 
+	reserved_word_constant 
+		one_or_more_identifiers_separated_by_commas 
+	':'
+		subtype_indication 
+		default_value(?) 
+	';' 
 
 signal_declaration :
-	reserved_word_signal one_or_more_identifiers_separated_by_commas ':'
-	subtype_indication  ( reserved_word_register | reserved_word_bus )(?)
-	default_value(?) ';' 
+	reserved_word_signal 
+		one_or_more_identifiers_separated_by_commas 
+	':'
+		subtype_indication  
+		reserved_word_register_or_bus(?)
+		default_value(?) 
+	';' 
 
-shared_variable_declaration : reserved_word_shared variable_declaration
+reserved_word_register_or_bus :
+	reserved_word_register | reserved_word_bus
+
+shared_variable_declaration : 
+	reserved_word_shared 
+	variable_declaration
+
 variable_declaration :
-	reserved_word_variable one_or_more_identifiers_separated_by_commas ':'
-	subtype_indication
-	default_value(?) ';' 
+	reserved_word_variable 
+		one_or_more_identifiers_separated_by_commas 
+	':'
+		subtype_indication
+		default_value(?)
+	';'
 
 file_declaration :
-	reserved_word_file one_or_more_identifiers_separated_by_commas ':'
-	subtype_indication
-	open_file_expression_is_string_expression_option(?) ';' 
+	reserved_word_file 
+		one_or_more_identifiers_separated_by_commas 
+	':'
+		subtype_indication
+		open_file_expression_is_string_expression_option(?)
+	';'
 	
 
 open_file_expression_is_string_expression_option :
-	open_file_expression_option(?) reserved_word_is string_expression 
+	open_file_expression_option(?) 
+	reserved_word_is 
+		string_expression 
 
 open_file_expression_option :
-	reserved_word_open file_open_kind_expression 
+	reserved_word_open 
+		file_open_kind_expression 
 
 alias_declaration :
-	reserved_word_alias ( identifier | character_literal | operator_symbol ) 
-	( ':' subtype_indication )(?)
-	reserved_word_is name signature(?) ';' 
+	reserved_word_alias 
+	identifier_or_character_literal_or_operator_symbol
+		colon_subtype_indication(?)
+	reserved_word_is
+		name 
+		signature(?) 
+	';'
+
+identifier_or_character_literal_or_operator_symbol : 
+	identifier | character_literal | operator_symbol
+
+colon_subtype_indication :
+	':'
+	subtype_indication
 
 component_declaration :
-	reserved_word_component component_name (reserved_word_is)(?)
-	optional_generic_declaration_section(?)
-	optional_port_declaration_section(?)
-	reserved_word_end reserved_word_component component_name(?) ';'  
+	reserved_word_component 
+		component_name 
+	reserved_word_is(?)
+		generic_declaration_section(?)
+		port_declaration_section(?)
+	reserved_word_end 
+	reserved_word_component 
+	component_name(?) 
+	';'  
 
 attribute_declaration :
-	reserved_word_attribute identifier ':' type_mark ';'
+	reserved_word_attribute 
+		identifier 
+	':' 
+		type_mark 
+	';'
 
 attribute_specification :
-	reserved_word_attribute identifier reserved_word_of entity_name_list ':' 
-	entity_class reserved_word_is expression_rule ';'
+	reserved_word_attribute 
+		identifier 
+	reserved_word_of 
+		entity_name_list 
+	':'
+		entity_class 
+	reserved_word_is 
+		expression_rule 
+	';'
 
 entity_name_list :
-	( list_of_id_or_char_or_op_with_optional_signature |
-	reserved_word_others |
-	reserved_word_all )
+	( reserved_word_others 
+	| reserved_word_all 
+	| list_of_id_or_char_or_op_with_optional_signature )
 
 list_of_id_or_char_or_op_with_optional_signature :
 	<leftop: id_or_char_or_op_with_optional_signature /(,)/
-	id_or_char_or_op_with_optional_signature>(?)
+		 id_or_char_or_op_with_optional_signature>(?)
 
 id_or_char_or_op_with_optional_signature :
-	( identifier | character_literal | operator_symbol )
+	identifier_or_character_literal_or_operator_symbol
 	signature(?)
 
 entity_class :
- 		(
-	  reserved_word_entity	| reserved_word_architecture | reserved_word_configuration | 
-	  reserved_word_procedure   | reserved_word_function	 | reserved_word_package 	   | 
-	  reserved_word_type	| reserved_word_subtype	 | reserved_word_constant	   | 
-	  reserved_word_signal	| reserved_word_variable 	 | reserved_word_component	   | 
-	  reserved_word_label 	| reserved_word_literal	 | reserved_word_units	   |
-	  reserved_word_group	| reserved_word_file	
+ 	(
+	  reserved_word_entity	
+	| reserved_word_architecture 
+	| reserved_word_configuration 
+	| reserved_word_procedure   
+	| reserved_word_function	 
+	| reserved_word_package 	   
+	| reserved_word_type	
+	| reserved_word_subtype	 
+	| reserved_word_constant	   
+	| reserved_word_signal	
+	| reserved_word_variable 	 
+	| reserved_word_component	   
+	| reserved_word_label 	
+	| reserved_word_literal	 
+	| reserved_word_units	   
+	| reserved_word_group	
+	| reserved_word_file	
 	)
 
 configuration_specification :
-	reserved_word_for component_specification binding_indication ';'
+	reserved_word_for 
+		component_specification 
+		binding_indication 
+	';'
 
 component_specification :
-	( one_or_more_instantiation_labels_separated_by_commas |
-	 reserved_word_others | reserved_word_all ) ':' component_name
+	reserved_word_others_all_or_one_or_more_instantiation_labels
+	':' 
+	component_name
 
+reserved_word_others_all_or_one_or_more_instantiation_labels :
+	  reserved_word_others 
+	| reserved_word_all
+	| one_or_more_instantiation_labels_separated_by_commas
 
 
 binding_indication : 
-	optional_use_entity_or_configuration_or_open(?)
-	optional_generic_map_section(?)
-	optional_port_map_section(?)
-';'
+	use_entity_or_configuration_or_open(?)
+	generic_map_section(?)
+	port_map_section(?)
+	';'
 
-optional_use_entity_or_configuration_or_open :
+use_entity_or_configuration_or_open :
 	reserved_word_use 
-	(
-		reserved_word_entity entity_name architecture_identifier(?) |
-		reserved_word_configuration configuration_name |
+		(
+		reserved_word_entity_and_entity_name_arch_name_in_parens |
+		reserved_word_configuration_and_configuration_name |
 		reserved_word_open
-	)
+		)
 
 disconnection_specification :
 	reserved_word_disconnect 
-	(
-		one_or_more_signals_separated_by_commas |
-		reserved_word_others |
-		reserved_word_all
-	)
-	':' type_mark
-	reserved_word_after time_expression ';'
+		(
+		  reserved_word_others
+		| reserved_word_all
+		| one_or_more_signals_separated_by_commas 
+		)
+	':'
+		type_mark
+	reserved_word_after 
+		time_expression 
+	';'
 
 group_template_declaration :
-	reserved_word_group identifier reserved_word_is 
-	'(' list_of_entity_class_with_option ')' ';'
+	reserved_word_group 
+		identifier 
+	reserved_word_is 
+	list_of_entity_class_with_optional_box_in_parens 
+	';'
 
-list_of_entity_class_with_option :
-	<leftop: entity_class_with_option /(,)/
-	 entity_class_with_option>(?)
+list_of_entity_class_with_optional_box_in_parens :
+	'(' list_of_entity_class_with_optional_box_operator ')'
 
-entity_class_with_option :
+list_of_entity_class_with_optional_box_operator :
+	<leftop: entity_class_with_optional_box_operator /(,)/
+	 entity_class_with_optional_box_operator>(?)
+
+entity_class_with_optional_box_operator :
 	entity_class
+	box_operator(?)
+
+box_operator : 
+	'<>'
 
 group_declaration :
-	reserved_word_group identifier ':' group_template_name 
-	'(' one_or_more_name_char_items_with_comma ')' ';'
+	reserved_word_group 
+		identifier 
+	':' 
+		group_template_name 
+		'(' one_or_more_name_char_items_with_comma ')' 
+	';'
 
 one_or_more_name_char_items_with_comma :
 	<leftop: name_or_char_literal /(,)/ name_or_char_literal>(?)
@@ -693,7 +861,10 @@ one_or_more_name_char_items_with_comma :
 name_or_char_literal :
 	( name | character_literal )
 
-use_clause : reserved_word_use one_or_more_selected_names_separated_by_commas ';'
+use_clause : 
+	reserved_word_use 
+		one_or_more_selected_names_separated_by_commas 
+	';'
 
 one_or_more_selected_names_separated_by_commas :
 	<leftop: selected_name /(,)/ selected_name>(?)
@@ -711,34 +882,47 @@ identifier_or_character_literal :
 	identifier | character_literal
 
 simple_expression_to_downto_simple_expression :
-	simple_expression ( reserved_word_to | reserved_word_downto ) simple_expression 
+	simple_expression 
+	reserved_word_to_or_downto 
+	simple_expression 
+
+reserved_word_to_or_downto :
+	reserved_word_to | reserved_word_downto
+
+range_attribute_name_or_simple_expression_to_downto_simple_expression :
+	range_attribute_name |
+	 simple_expression_to_downto_simple_expression
 
 integer_type_definition :
 	reserved_word_range 
-	( range_attribute_name |
-	 simple_expression_to_downto_simple_expression )
+	range_attribute_name_or_simple_expression_to_downto_simple_expression
  
 floating_type_definition :
 	reserved_word_range 
-	( range_attribute_name |
-	 simple_expression_to_downto_simple_expression )
- 
+	range_attribute_name_or_simple_expression_to_downto_simple_expression 
+
 physical_type_definition :
 	reserved_word_range 
-	( range_attribute_name |
-	 simple_expression_to_downto_simple_expression )
-	reserved_word_units identifier ';'
-	identifier_is_physical_literal(?)
-	reserved_word_end reserved_word_units identifier(?)
+	range_attribute_name_or_simple_expression_to_downto_simple_expression
+	reserved_word_units 
+		identifier
+	';'
+		identifier_is_physical_literal(?)
+	reserved_word_end 
+	reserved_word_units 
+		identifier(?)
 
 identifier_is_physical_literal :
 	identifier '=' physical_literal
 
 array_type_definition :
-	reserved_word_array '('
-	( array_type_mark_definition | array_discrete_range_definition )
-	')' reserved_word_of
-	element_subtype_indication
+	reserved_word_array 
+	'(' array_type_mark_definition_or_array_discrete_range_definition ')'
+	reserved_word_of
+		element_subtype_indication
+
+array_type_mark_definition_or_array_discrete_range_definition : 
+	array_type_mark_definition | array_discrete_range_definition
 
 array_type_mark_definition :
 	one_or_more_type_mark_ranges_separated_by_commas 
@@ -747,7 +931,7 @@ one_or_more_type_mark_ranges_separated_by_commas :
 	<leftop: type_mark_range_box /(,)/ type_mark_range_box>(?)
 
 type_mark_range_box :
-	type_mark reserved_word_range '<>'
+	type_mark reserved_word_range box_operator
 
 array_discrete_range_definition :
 	one_or_more_discrete_ranges_separated_by_commas
@@ -758,35 +942,46 @@ record_type_definition :
 	reserved_word_end reserved_word_record identifier(?)
 
 record_element_definition :
-	one_or_more_identifiers_separated_by_commas ':'
-	subtype_indication ';'
+	one_or_more_identifiers_separated_by_commas 
+	':'
+	subtype_indication 
+	';'
 
 access_type_definition :
-	reserved_word_access subtype_indication
+	reserved_word_access 
+		subtype_indication
 
 file_type_definition :
-	reserved_word_file reserved_word_of type_mark
+	reserved_word_file 
+	reserved_word_of 
+		type_mark
 
 subtype_declaration :
-	reserved_word_subtype identifier reserved_word_is subtype_indication ';'
+	reserved_word_subtype 
+		identifier 
+	reserved_word_is 
+		subtype_indication 
+	';'
 
 subtype_indication :
 	# resolution_function_name 
 	type_mark
-	optional_range_or_simple_or_discrete(?)  
+	range_or_simple_or_discrete(?)  
 
-optional_range_or_simple_or_discrete :
-	  range_range_attribute_name_or_simple_downto_expression
-	| '(' discrete_range ')'
+range_or_simple_or_discrete :
+	  reserved_word_range_range_attribute_name_or_simple_downto_expression
+	| discrete_range_in_parens
 
-range_range_attribute_name_or_simple_downto_expression :
+discrete_range_in_parens :
+ 	'(' discrete_range ')'
+
+reserved_word_range_range_attribute_name_or_simple_downto_expression :
 	reserved_word_range 
-		( range_attribute_name |
-		  simple_expression_to_downto_simple_expression ) 		
+	range_attribute_name_or_simple_expression_to_downto_simple_expression 		
 	
 discrete_range :
-	  simple_expression_to_downto_simple_expression 
-	| range_attribute_name 
+	  range_attribute_name 
+	| simple_expression_to_downto_simple_expression
 	| discrete_subtype_indication
 
 discrete_subtype_indication : 
@@ -807,20 +1002,24 @@ concurrent_statement :
 	| generate_statement 
 
 block_statement :
-	block_label ':'
+	block_label 
+	':'
 	reserved_word_block
-		optional_guard_expression(?)
-		(reserved_word_is)(?)
-		optional_generic_declaration_section(?)
-		optional_generic_map_section(?)
-		optional_port_declaration_section(?)
-		optional_port_map_section(?)
+		guard_expression_in_parens(?)
+	reserved_word_is(?)
+		generic_declaration_section(?)
+		generic_map_section(?)
+		port_declaration_section(?)
+		port_map_section(?)
 		block_declarative_item(s?)
 	reserved_word_begin
 		concurrent_statement(s?)
-	reserved_word_end reserved_word_block block_label(?) ';'
+	reserved_word_end 
+	reserved_word_block 
+	block_label(?) 
+	';'
 
-optional_guard_expression :
+guard_expression_in_parens :
 	'(' guard_expression ')'
 
 block_declarative_item :
@@ -843,17 +1042,25 @@ block_declarative_item :
 	| group_declaration
 
 process_statement :
-	( process_label ':' )(?)
-	( reserved_word_postponed )(?)
+	label_followed_by_colon(?)
+	reserved_word_postponed(?)
 	reserved_word_process
-	optional_sensitivity_list(?)
-	(reserved_word_is)(?)
+		sensitivity_list(?)
+	reserved_word_is(?)
 		process_declarative_item(s?)
 	reserved_word_begin
 		sequential_statement(s?)
-	reserved_word_end (reserved_word_postponed)(?) reserved_word_process (process_label)(?) ';'
+	reserved_word_end 
+	reserved_word_postponed(?) 
+	reserved_word_process 
+	process_label(?) 
+	';'
 
-optional_sensitivity_list :
+
+label_followed_by_colon : 
+	label ':'
+
+sensitivity_list :
 	'(' one_or_more_signals_separated_by_commas ')'
 
 process_declarative_item :
@@ -872,45 +1079,46 @@ process_declarative_item :
 	| group_declaration 
 
 concurrent_procedure_call_statement :
-	( label ':')(?)
-	(reserved_word_postponed)(?)
-	procedure_name
-	optional_parameter_section(?)
+	label_followed_by_colon(?)
+	reserved_word_postponed(?)
+		procedure_name
+		subprogram_parameter_section(?)
 	';'
 
 concurrent_assertion_statement :
-	( label ':')(?)
-	(reserved_word_postponed)(?)
-	reserved_word_assert boolean_expression 
-	(reserved_word_report expression_rule)(?)
-	(reserved_word_severity expression_rule)(?) ';'
+	label_followed_by_colon(?)
+	reserved_word_postponed(?)
+	reserved_word_assert 
+		boolean_expression 
+	reserved_word_report_and_expression_rule(?)
+	reserved_word_severity_and_expression_rule(?) 
+	';'
+
+reserved_word_report_and_expression_rule :
+	reserved_word_report 
+		expression_rule
+
+reserved_word_severity_and_expression_rule :
+	reserved_word_severity 
+		expression_rule
 
 concurrent_signal_assignment_statement :
-	( label ':')(?) (reserved_word_postponed)(?) 
-	( selected_signal_assignment | conditional_signal_assignment )
+	label_followed_by_colon(?) 
+	reserved_word_postponed(?) 
+	selected_or_conditional_signal_assignment
 
-conditional_signal_assignment :
-	( name | aggregate ) 
-	'<=' 
-	(reserved_word_guarded)(?) 
-	delay_mechanism(?)
-	waveform_rule 
-	when_boolean_expression_else_waveform_rule(s?)
-	';' 
-
-when_boolean_expression_else_waveform_rule :
-	reserved_word_when 
-	boolean_expression 
-	reserved_word_else
-	waveform_rule
+selected_or_conditional_signal_assignment : 
+	selected_signal_assignment | conditional_signal_assignment
 
 selected_signal_assignment :
-	reserved_word_with expression_rule reserved_word_select
-	( name | aggregate ) 
+	reserved_word_with 
+		expression_rule 
+	reserved_word_select
+		name_or_aggregate 
 	'<='
-	(reserved_word_guarded)(?) 
-	(delay_mechanism)(?)
-	one_or_more_waveform_when_choices_comma_separated
+	reserved_word_guarded(?) 
+	delay_mechanism(?)
+		one_or_more_waveform_when_choices_comma_separated
 	';'
 
 one_or_more_waveform_when_choices_comma_separated :
@@ -919,42 +1127,75 @@ one_or_more_waveform_when_choices_comma_separated :
 waveform_when_choices :
 	waveform_rule reserved_word_when choices_separated_by_pipe 
 
+conditional_signal_assignment :
+	name_or_aggregate 
+	'<=' 
+	reserved_word_guarded(?) 
+	delay_mechanism(?)
+		waveform_rule 
+		when_boolean_expression_else_waveform_rule(s?)
+	';' 
+
+name_or_aggregate : 
+	name | aggregate
+
+when_boolean_expression_else_waveform_rule :
+	reserved_word_when 
+		boolean_expression 
+	reserved_word_else
+		waveform_rule
+
 component_instantiation_statement :
-	instantiation_label ':'
+	instantiation_label 
+	':'
 	(
-		component_instance_component_name |
-		component_instance_entity_name    |
-		component_instance_configuration_name 
+		reserved_word_entity_and_entity_name_arch_name_in_parens |
+		reserved_word_configuration_and_configuration_name |
+		reserved_word_component_and_component_name 
 	)
-	optional_generic_map_section(?)
-	optional_port_map_section(?)
-';'
+	generic_map_section(?)
+	port_map_section(?)
+	';'
 
-component_instance_component_name :
-	(reserved_word_component)(?) component_name  
+reserved_word_entity_and_entity_name_arch_name_in_parens :
+	reserved_word_entity 
+		entity_name 
+		architecture_identifier_in_parens(?)  
 
-component_instance_entity_name :
-	reserved_word_entity entity_name optional_architecture_identifier(?)  
+reserved_word_configuration_and_configuration_name :
+	reserved_word_configuration 
+		configuration_name 
 
-optional_architecture_identifier :
+reserved_word_component_and_component_name :
+	reserved_word_component(?) 
+		component_name  
+
+architecture_identifier_in_parens :
 	 '(' architecture_identifier ')'  
-
-component_instance_configuration_name :
-	 reserved_word_configuration configuration_name 
 
 generate_statement :
 	generate_label ':'
-	( for_identifier_in_range | if_boolean_expression )
+		for_identifier_in_range_or_if_boolean_expression
 	reserved_word_generate
-	generate_block_declarative_item_and_begin(?)
-	concurrent_statement(s?)
-	reserved_word_end reserved_word_generate generate_label(?) ';'
+		generate_block_declarative_item_and_begin(?)
+		concurrent_statement(s?)
+	reserved_word_end 
+	reserved_word_generate 
+	generate_label(?) 
+	';'
+
+for_identifier_in_range_or_if_boolean_expression :
+	for_identifier_in_range | if_boolean_expression
 
 for_identifier_in_range :
-	reserved_word_for identifier reserved_word_in discrete_range
+	reserved_word_for 
+		identifier 
+	reserved_word_in 
+		discrete_range
 
 if_boolean_expression :
-	reserved_word_if boolean_expression
+	reserved_word_if 
+		boolean_expression
 
 generate_block_declarative_item_and_begin :
 	block_declarative_item(s?)
@@ -978,42 +1219,64 @@ sequential_statement :
 	| null_statement
 
 wait_statement :
-	( label ':')(?)
+	label_followed_by_colon(?)
 	reserved_word_wait
-	on_list_of_signal(?)
-	( reserved_word_until boolean_expression )(?)
-	( reserved_word_for time_expression )(?)
+		on_list_of_signal(?)
+	reserved_word_until_and_boolean_expression(?)
+	reserved_word_for_and_time_expression(?)
 	';'
+
+reserved_word_until_and_boolean_expression :
+	reserved_word_until 
+		boolean_expression
+
+reserved_word_for_and_time_expression :
+	reserved_word_for 
+		time_expression
 
 on_list_of_signal :
- 		reserved_word_on one_or_more_signals_separated_by_commas
+ 	reserved_word_on 
+		one_or_more_signals_separated_by_commas
 
 assertion_statement :
-	( label ':' )(?)
+	label_followed_by_colon(?)
 	reserved_word_assert boolean_expression
-	( reserved_word_report expression_rule )(?)
-	( reserved_word_severity expression_rule )(?)
+	reserved_word_report_and_expression_rule(?)
+	reserved_word_severity_and_expression_rule(?)
 	';'
 
+reserved_word_report_and_expression_rule :
+	reserved_word_report 
+		expression_rule
+
+reserved_word_severity_and_expression_rule :
+	reserved_word_severity 
+		expression_rule
+
 report_statement :
-	( label ':' )(?)
-	reserved_word_report expression_rule 
-	( reserved_word_severity expression_rule )(?)
+	label_followed_by_colon(?)
+	reserved_word_report_and_expression_rule 
+	reserved_word_severity_and_expression_rule(?)
 	';'
 
 signal_assignment_statement :
-	( label ':' )(?)
-	( name | aggregate ) 
+	label_followed_by_colon(?)
+	name_or_aggregate 
 	'<='
 	delay_mechanism(?)
 	waveform_rule
 	';'
 
 delay_mechanism :
-	( reserved_word_transport | inertial_with_optional_reject_time )
+	reserved_word_transport | inertial_with_optional_reject_time
 
 inertial_with_optional_reject_time :
-	( reserved_word_reject time_expression )(?) reserved_word_inertial
+	reserved_word_reject_and_time_expression(?) 
+	reserved_word_inertial
+
+reserved_word_reject_and_time_expression :
+	reserved_word_reject 
+		time_expression
 
 waveform_rule :
 	  reserved_word_unaffected 
@@ -1027,34 +1290,47 @@ waveform_item :
 	| value_expression_with_optional_time_expression
 
 null_with_optional_after_time_expression :
-	reserved_word_null optional_after_time_expression(?) 
+	reserved_word_null 
+	reserved_word_after_and_time_expression(?) 
 
 value_expression_with_optional_time_expression :
 	value_expression 
-	optional_after_time_expression(?)
+	reserved_word_after_and_time_expression(?)
 
-optional_after_time_expression :
+reserved_word_after_and_time_expression :
 	reserved_word_after 
 	time_expression 
 
 variable_assignment_statement :
-	( label ':')(?)
-	( name | aggregate ) ':=' expression_rule ';'
+	label_followed_by_colon(?)
+		name_or_aggregate 
+	':=' 
+		expression_rule 
+	';'
 
 procedure_call_statement :
-	( label ':')(?)
-	procedure_name optional_parameter_section(?) ';'
+	label_followed_by_colon(?)
+		procedure_name 
+		subprogram_parameter_section(?) 
+	';'
 
 if_statement :
-	( if_label ':')(?)
-	reserved_word_if boolean_expression reserved_word_then
+	label_followed_by_colon(?)
+	reserved_word_if 
+		boolean_expression 
+	reserved_word_then
 		sequential_statement(s)
 	optional_elsif_section(s?)
 	optional_else_section(?)
-	reserved_word_end reserved_word_if if_label(?) ';'
+	reserved_word_end 
+	reserved_word_if 
+	if_label(?) 
+	';'
 
 optional_elsif_section :
-	reserved_word_elsif boolean_expression reserved_word_then
+	reserved_word_elsif 
+		boolean_expression 
+	reserved_word_then
 		sequential_statement(s)
 
 optional_else_section :
@@ -1062,35 +1338,66 @@ optional_else_section :
 		sequential_statement(s)
 
 case_statement :
-	( case_label ':' )(?)
+	label_followed_by_colon(?)
 	reserved_word_case expression_rule reserved_word_is
 		when_choices_sequential_statement(s)
 	reserved_word_end reserved_word_case case_label(?) ';'
 
 when_choices_sequential_statement :
-	reserved_word_when choices_separated_by_pipe '=>' sequential_statement(s)
+	reserved_word_when 
+		choices_separated_by_pipe 
+	'=>' 
+		sequential_statement(s)
 
 loop_statement :
-	( loop_label ':')(?)
-	( reserved_word_while boolean_expression |
-	  reserved_word_for identifier reserved_word_in discrete_range )
+	label_followed_by_colon(?)
+	while_boolean_or_for_identifier_in_discrete_range
 	reserved_word_loop
 		sequential_statement(s)
 	reserved_word_end reserved_word_loop loop_label(?) ';'
 
+while_boolean_or_for_identifier_in_discrete_range :
+	  reserved_word_while_and_boolean_expression
+	| reserved_word_for_identifier_in_discrete_range
+
+reserved_word_while_and_boolean_expression :
+	reserved_word_while 
+		boolean_expression
+
+reserved_word_for_identifier_in_discrete_range :
+	reserved_word_for 
+		identifier 
+	reserved_word_in 
+		discrete_range
+
 next_statement :
-	( label ':' )(?) reserved_word_next loop_label(?) 
-	( reserved_word_when boolean_expression )(?) ';'
+	label_followed_by_colon(?) 
+	reserved_word_next 
+	loop_label(?) 
+	reserved_word_when_and_boolean_expression(?) 
+	';'
 
 exit_statement :
-	( label ':' )(?) reserved_word_exit loop_label(?) 
-	( reserved_word_when boolean_expression )(?) ';'
+	label_followed_by_colon(?) 
+	reserved_word_exit 
+	loop_label(?) 
+	reserved_word_when_and_boolean_expression(?) 
+	';'
+
+reserved_word_when_and_boolean_expression :
+	reserved_word_when 
+		boolean_expression
 
 return_statement :
-	( label ':' )(?) reserved_word_return expression_rule(?) ';'
+	label_followed_by_colon(?) 
+	reserved_word_return 
+	expression_rule(?) 
+	';'
 
 null_statement :
-	( label ':' )(?) reserved_word_null ';'
+	label_followed_by_colon(?) 
+	reserved_word_null 
+	';'
 
 
 ####################################################
@@ -1106,32 +1413,58 @@ interface_item :
 	| file_interface
 
 constant_interface :
-	(reserved_word_constant)(?) one_or_more_identifiers_separated_by_commas ':' 
-	(reserved_word_in)(?) subtype_indication default_value(?) ';'
+	reserved_word_constant(?) 
+		one_or_more_identifiers_separated_by_commas 
+	':' 
+	reserved_word_in(?) 
+		subtype_indication 
+		default_value(?) 
+	';'
 
 
 signal_interface :
-	(reserved_word_signal)(?) one_or_more_identifiers_separated_by_commas ':' 
-	mode(?) subtype_indication (reserved_word_bus)(?) 
-	default_value(?) ';'
+	reserved_word_signal(?) 
+		one_or_more_identifiers_separated_by_commas 
+	':' 
+		mode(?) 
+		subtype_indication 
+	reserved_word_bus(?) 
+		default_value(?) 
+	';'
 
 variable_interface :
-	(reserved_word_variable)(?) one_or_more_identifiers_separated_by_commas ':' 
-	mode(?) subtype_indication default_value(?) ';'
+	reserved_word_variable(?) 
+		one_or_more_identifiers_separated_by_commas 
+	':' 
+		mode(?) 
+		subtype_indication 
+		default_value(?) 
+	';'
 
 file_interface :
-	reserved_word_file one_or_more_identifiers_separated_by_commas ':'
-	 subtype_indication ';'
+	reserved_word_file 
+		one_or_more_identifiers_separated_by_commas 
+	':'
+		subtype_indication 
+	';'
 
 mode : 
-	 reserved_word_in | reserved_word_out | reserved_word_inout | reserved_word_buffer | reserved_word_linkage 
+	  reserved_word_inout 
+	| reserved_word_out 
+	| reserved_word_in 
+	| reserved_word_buffer 
+	| reserved_word_linkage 
 
 association_list :
 	<leftop: actual_part_with_optional_formal_part /(,)/
 	 actual_part_with_optional_formal_part>(?)
 
 actual_part_with_optional_formal_part :
-	( formal_part '=>' ) actual_part
+	formal_part_and_arrow 
+		actual_part
+
+formal_part_and_arrow :
+	formal_part '=>'
 
 formal_part :
 	  generic_name 
@@ -1141,7 +1474,10 @@ formal_part :
 	| type_mark generic_port_parameter_selection 
 
 generic_port_parameter_selection :
-	'(' ( generic_name | port_name | parameter_name ) ')'
+	'(' generic_name_port_name_parameter_name ')'
+
+generic_name_port_name_parameter_name :
+	generic_name | port_name | parameter_name
 
 actual_part :
 	  expression_rule 
@@ -1153,15 +1489,17 @@ actual_part :
 
 function_name_signal_name_or_variable_name_selection :
 	function_name
-	signal_name_or_variable_name_selection
+	signal_name_or_variable_name_in_parens
 
 type_mark_signal_name_or_variable_name_selection :
 	type_mark
-	signal_name_or_variable_name_selection
+	signal_name_or_variable_name_in_parens
 
-signal_name_or_variable_name_selection :
-	'(' ( signal_name | variable_name ) ')'
+signal_name_or_variable_name_in_parens :
+	'(' signal_name_or_variable_name ')'
 
+signal_name_or_variable_name :
+	signal_name | variable_name
 
 ####################################################
 # E.8 Expressions
@@ -1174,23 +1512,48 @@ static_expression :
 
 
 expression_rule : 
-	relation logic_relation(s?)
+	relation 
+	logic_relation(s?)
 
 logic_relation : 
-	( reserved_word_and | reserved_word_nand | reserved_word_or | reserved_word_nor | reserved_word_xor | reserved_word_xnor ) relation
+	logic_relation_operator
+	relation
+
+logic_relation_operator : 
+	  reserved_word_and 
+	| reserved_word_nand 
+	| reserved_word_or 
+	| reserved_word_nor 
+	| reserved_word_xor 
+	| reserved_word_xnor 
 
 relation :
-	shift_expression relation_shift_expression(?)
+	shift_expression 
+	relation_shift_expression(?)
 
 relation_shift_expression :
-	( '=' | '/=' | '<' | '<=' | '>' | '>=' ) shift_expression 
+	relation_operator 
+	shift_expression 
+
+relation_operator : 
+	'=' | '/=' | '<' | '<=' | '>' | '>='
 
 shift_expression :
-	simple_expression shift_simple_expression(?)
+	simple_expression 
+	shift_simple_expression(?)
 
 shift_simple_expression :
-	 ( reserved_word_sll | reserved_word_srl | reserved_word_sla | reserved_word_sra | reserved_word_rol | reserved_word_ror )
+	 shift_operator
 	 simple_expression 
+
+shift_operator : 
+	  reserved_word_sll 
+	| reserved_word_srl 
+	| reserved_word_sla 
+	| reserved_word_sra 
+	| reserved_word_rol
+	| reserved_word_ror 
+
 
 simple_expression :
 	sign(?) term optional_term(s?) 
@@ -1220,9 +1583,15 @@ multiply_operator :
 	| reserved_word_rem
 
 factor :
-	  reserved_word_abs primary 
-	| reserved_word_not primary 
+	  reserved_word_abs_and_primary 
+	| reserved_word_not_and_primary
 	| primary_exp_primary 
+
+reserved_word_abs_and_primary :
+	reserved_word_abs primary
+
+reserved_word_not_and_primary :
+	reserved_word_not primary
 
 primary_exp_primary :
 	primary exponent_primary(?) 
@@ -1248,14 +1617,20 @@ type_conversion :
 	type_mark '(' expression_rule ')'
 
 allocator :
-	reserved_word_new subtype_indication |
-	reserved_word_new qualified_expression 
+	reserved_word_new 
+	subtype_indication_or_qualified_expression
+
+subtype_indication_or_qualified_expression :
+	  subtype_indication 
+	| qualified_expression
 
 function_call : 
-	function_name optional_parameter_section(?)
+	function_name 
+	subprogram_parameter_section(?)
 
 qualified_expression :
-	type_mark_tick_expression | type_mark_tick_aggregate
+	  type_mark_tick_expression 
+	| type_mark_tick_aggregate
 
 type_mark_tick_expression :
 	type_mark "'" '(' expression_rule ')'
@@ -1270,14 +1645,23 @@ name :
 	  attribute_name 
 	| operator_symbol 
 	| selected_name 
-	| identifier '(' one_or_more_expressions_separated_by_commas ')'
-	| identifier '(' discrete_range ')'
+	| identifier_paren_one_or_more_expressions_separated_by_commas
+	| identifier_paren_discrete_range
 	| identifier
+
+identifier_paren_one_or_more_expressions_separated_by_commas : 
+	identifier '(' one_or_more_expressions_separated_by_commas ')'
+
+identifier_paren_discrete_range : 
+	identifier '(' discrete_range ')'
 
 selected_name :
 	identifier  '.' 
 	( identifier  '.' )(?)
-	( identifier | character_literal | operator_symbol | reserved_word_all )
+	reserved_word_all_or_identifier_or_character_literal_or_operator_symbol
+
+reserved_word_all_or_identifier_or_character_literal_or_operator_symbol :
+	reserved_word_all | identifier_or_character_literal_or_operator_symbol
 
 operator_symbol :
 	'"' graphic_character '"'
@@ -1286,8 +1670,14 @@ attribute_name :
 	identifier "'" identifier 
 
 signature :
-	'[' one_or_more_type_marks_separated_by_commas(?) ')' 
-	( reserved_word_return type_mark )(?)
+	'[' 
+	one_or_more_type_marks_separated_by_commas(?)  
+	reserved_word_return_and_type_mark(?)
+	']'
+
+reserved_word_return_and_type_mark :
+	reserved_word_return 
+	type_mark
 
 literal :
 	  character_literal
@@ -1300,7 +1690,11 @@ literal :
 	| reserved_word_null
 
 decimal_or_based_unit_name :
-	( decimal_literal | based_literal ) unit_name 
+	decimal_literal_or_based_literal 
+	unit_name 
+
+decimal_literal_or_based_literal :
+	decimal_literal | based_literal
 
 decimal_literal : 
 	integer
@@ -1381,7 +1775,7 @@ entity_name : identifier
 ####
 # generics
 ####
-optional_generic_declaration_section : 
+generic_declaration_section : 
 	reserved_word_generic generic_interface_list(?) ';'
 
 
@@ -1402,7 +1796,7 @@ generic_interface_list_entry :
 default_value : 
 	':=' static_expression
 
-optional_generic_map_section : 
+generic_map_section : 
 	reserved_word_generic reserved_word_map optional_generic_association_list(?)   
 
 optional_generic_association_list :
@@ -1415,7 +1809,7 @@ generic_association_list :
 ####
 # ports
 ####
-optional_port_declaration_section : 
+port_declaration_section : 
 	reserved_word_port port_interface_list(?) ';'
 
 port_interface_list : 
@@ -1438,7 +1832,7 @@ one_or_more_ports_separated_by_commas :
 
 
 
-optional_port_map_section : 
+port_map_section : 
 	reserved_word_port reserved_word_map optional_port_association_list(?)   
 
 optional_port_association_list :
@@ -1450,7 +1844,7 @@ port_association_list :
 ####
 # parameters to procedure/function call
 ####
-optional_parameter_section : 
+subprogram_parameter_section : 
 	'(' parameter_association_list ')' 
 
 parameter_association_list :
@@ -1701,17 +2095,10 @@ Hardware::Vhdl::Parser - Perl extension for parsing VHDL code
   use Hardware::Vhdl::Parser;
   $parser = new Hardware::Vhdl::Parser;
 
-  my @file = <>;
-  my $file = join('',@file);
-  $parser->design_file($file);
+  $parser->Filename(@ARGV);
 
 =head1 DESCRIPTION
 
-##################################################################
-# Copyright (C) 2000 Greg London   All Rights Reserved.
-# This program is free software; you can redistribute it and/or
-# modify it under the same terms as Perl itself.
-##################################################################
 
 This module defines the complete grammar needed to parse any VHDL code.
 By overloading this grammar, it is possible to easily create perl scripts
@@ -1726,6 +2113,12 @@ hierarchical browser of a VHDL design.
 =head1 AUTHOR
 
 Greg London  greg42@bellatlantic.net
+
+##################################################################
+# Copyright (C) 2000 Greg London   All Rights Reserved.
+# This program is free software; you can redistribute it and/or
+# modify it under the same terms as Perl itself.
+##################################################################
 
 =head1 SEE ALSO
 

@@ -26,5 +26,5 @@ eval ( "$parser->Filename(@ARGV);" );
 if ($@ == '')
 	{print "OK\n";}
 else
-	{print "fail!\n";
+	{print "fail!\n";}
 

@@ -1,8 +1,20 @@
+LIBrary IEEE; 
 
+-- -----------------------------------------------
+-- comment_one
+-- -----------------------------------------------
+-- comment_two
+-- -----------------------------------------------
 
-Package mypackage is
+package mypackage is
 
-	TyPe mytype;
+	type mytype;
+
+	-- -----------------------------------------------
+	-- comment_one
+	-- -----------------------------------------------
+	-- comment_two
+	-- -----------------------------------------------
 
 	function my_function return mytype;
 
@@ -10,17 +22,23 @@ Package mypackage is
 
 end  ;
 
-package BOdy mypackage is
+package body mypackage is
 
 	function my_function return mytype is
 	
 	begin
 
-		caSE yada is
+		Case yada is
 			when fist_choice => null;
 		end case ;
 
 	end function ;
+
+	-- -----------------------------------------------
+	-- comment_one
+	-- -----------------------------------------------
+	-- comment_two
+	-- -----------------------------------------------
 
 
 	procedure yada is

@@ -24,16 +24,17 @@ sub new
  my $r_hash = $pkg->SUPER::new;
 
  $r_hash -> Replace ( q( 
-	component_instantiation_statement :
-		instantiation_label ':'
-		(
-			component_instance_component_name |
-			component_instance_entity_name    |
-			component_instance_configuration_name 
-		)
-		optional_generic_map_section(?)
-		optional_port_map_section(?)
-		';'
+component_instantiation_statement :
+	instantiation_label 
+	':'
+	(
+		reserved_word_entity_and_entity_name_arch_name_in_parens |
+		reserved_word_configuration_and_configuration_name |
+		reserved_word_component_and_component_name 
+	)
+	generic_map_section(?)
+	port_map_section(?)
+	';'
 
 		{ print "INSTANCENAME $item{instantiation_label} \n"; }
  ));

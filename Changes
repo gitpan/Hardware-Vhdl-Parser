@@ -6,3 +6,8 @@ Revision history for Perl extension Hardware::Vhdl::Parser.
 0.07  3 Feb 2000
 	- now handles comments.
 	- and reserved words are case insensitive
+
+0.08 7 Feb 2000
+	- add comment to test1.vhd file
+	- fixed bug in grammar for configuration specification
+	- fixed missing '}' in test.pl
